@@ -20,6 +20,7 @@
 #' @export 
 delete_interview <- function(
     interview_id,
+    workspace = "priamry",
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
     password = Sys.getenv("SUSO_PASSWORD")  # API password       
@@ -32,7 +33,7 @@ delete_interview <- function(
         fail_msg = "Interview ID in `interview_id` is not a valid GUID.")
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id)
+    base_url <- paste0(server,"/",workspace, "/api/v1/interviews/", interview_id)
 
     # get stats from the server
     response <- httr::DELETE(
@@ -414,6 +415,7 @@ get_interviews <- function(
 #' @export
 get_interview_stats <- function(
     interview_id,
+    workspace = "primary",
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
     password = Sys.getenv("SUSO_PASSWORD")  # API password    
@@ -426,7 +428,7 @@ get_interview_stats <- function(
         fail_msg = "Interview ID in `interview_id` is not a valid GUID.")
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id, "/stats")
+    base_url <- paste0(server,"/",workspace, "/api/v1/interviews/", interview_id, "/stats")
 
     # get stats from the server
     response <- httr::GET(
@@ -500,6 +502,7 @@ get_interview_stats <- function(
 #' @export
 approve_interview_as_sup <- function(
     interview_id,
+    workspace = "primary",
     comment = "",
     verbose = FALSE,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
@@ -514,7 +517,7 @@ approve_interview_as_sup <- function(
         fail_msg = "Interview ID in `interview_id` is not a valid GUID.")
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id, "/approve")
+    base_url <- paste0(server,"/",workspace,"/api/v1/interviews/", interview_id, "/approve")
 
     # form query portion of request
     query <- list(
@@ -586,6 +589,7 @@ approve_interview_as_sup <- function(
 #' @examples
 assign_interview_to_int <- function(
     interview_id,
+    workspace = "priamry",
     user_id = "",
     user_name = "",
     verbose = FALSE,
@@ -613,7 +617,7 @@ assign_interview_to_int <- function(
     }
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id, "/assign")
+    base_url <- paste0(server,"/",workspace,"/api/v1/interviews/", interview_id, "/assign")
 
     # form the body for the assignment request
     # ... if only `user_id` provided
@@ -702,6 +706,7 @@ assign_interview_to_int <- function(
 #' @export
 assign_interview_to_sup <- function(
     interview_id,
+    workspace = "primary",
     user_id = "",
     user_name = "",
     verbose = FALSE,
@@ -730,7 +735,7 @@ assign_interview_to_sup <- function(
     }
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id, "/assignsupervisor")
+    base_url <- paste0(server,"/",workspace,"/api/v1/interviews/", interview_id, "/assignsupervisor")
 
     # form the body for the assignment request
     # ... if only `user_id` provided
@@ -818,6 +823,7 @@ assign_interview_to_sup <- function(
 #' @export
 approve_interview_as_hq <- function(
     interview_id,
+    workspace = "primary",
     comment = "",
     verbose = FALSE,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
@@ -832,7 +838,7 @@ approve_interview_as_hq <- function(
         fail_msg = "Interview ID in `interview_id` is not a valid GUID.")
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id, "/hqapprove")
+    base_url <- paste0(server,"/",workspace,"/api/v1/interviews/", interview_id, "/hqapprove")
 
     # form query portion of request
     query <- list(
@@ -903,6 +909,7 @@ approve_interview_as_hq <- function(
 #' @export
 reject_interview_as_hq <- function(
     interview_id,
+    workspace = "primary",
     comment = "",
     responsible_id = "",
     verbose = FALSE,
@@ -925,7 +932,7 @@ reject_interview_as_hq <- function(
     }
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id, "/hqreject")
+    base_url <- paste0(server,"/",workspace,"/api/v1/interviews/", interview_id, "/hqreject")
 
     # form query portion of request
     query <- list(
@@ -997,6 +1004,7 @@ reject_interview_as_hq <- function(
 #' @export
 unapprove_interview <- function(
     interview_id,
+    workspace = "primary",
     comment = "",
     verbose = FALSE,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
@@ -1011,7 +1019,7 @@ unapprove_interview <- function(
         fail_msg = "Interview ID in `interview_id` is not a valid GUID.")
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id, "/hqunapprove")
+    base_url <- paste0(server,"/",workspace,"/api/v1/interviews/", interview_id, "/hqunapprove")
 
     # form query portion of request
     query <- list(
@@ -1082,6 +1090,7 @@ unapprove_interview <- function(
 #' @export
 reject_interview_as_sup <- function(
     interview_id,
+    workspace = "primary",
     comment = "",
     responsible_id = "",
     verbose = FALSE,
@@ -1104,7 +1113,7 @@ reject_interview_as_sup <- function(
     }
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id, "/reject")
+    base_url <- paste0(server,"/",workspace, "/api/v1/interviews/", interview_id, "/reject")
 
     # form query portion of request
     query <- list(
@@ -1182,6 +1191,7 @@ reject_interview_as_sup <- function(
 #' @export
 comment_question <- function(
     interview_id,
+    workspace = "primary",
     variable_name,
     roster_vector = "",
     comment,
@@ -1209,7 +1219,7 @@ comment_question <- function(
     )
 
     # formulate API call
-    base_url <- paste0(server,
+    base_url <- paste0(server,"/",workspace,
         "/api/v1/interviews/", interview_id, 			# interview
         "/comment-by-variable/", variable_name 		# variable
     )
@@ -1284,6 +1294,7 @@ comment_question <- function(
 #' @export 
 get_interview_transcript <- function(
     interview_id,
+    workspace = "primary",
     path,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
@@ -1297,7 +1308,7 @@ get_interview_transcript <- function(
         fail_msg = "Interview ID in `interview_id` is not a valid GUID.")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id, "/pdf")
+    base_url <- paste0(server,"/",workspace,"/api/v1/interviews/", interview_id, "/pdf")
 
     # make request
     response <- httr::GET(
@@ -1380,6 +1391,7 @@ get_interview_transcript <- function(
 #' @export 
 get_interview_history <- function(
     interview_id,
+    workspace = "primary",
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
     password = Sys.getenv("SUSO_PASSWORD")  # API password    
@@ -1392,7 +1404,7 @@ get_interview_history <- function(
         fail_msg = "Interview ID in `interview_id` is not a valid GUID.")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/interviews/", interview_id, "/history")
+    base_url <- paste0(server,"/",workspace,"/api/v1/interviews/", interview_id, "/history")
 
     # make request
     response <- httr::GET(
