@@ -31,6 +31,7 @@ get_export_jobs <- function(
     has_file = "", # values: c(true, false)
     limit = 40, # limit %in% c(1, 40)
     offset = 0, #
+    workspace = "primary",
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
     password = Sys.getenv("SUSO_PASSWORD")  # API password
@@ -87,7 +88,7 @@ get_export_jobs <- function(
     }
 
     # form base URL
-    base_url <- paste0(server, "/api/v2/export")
+    base_url <- paste0(server,"/",workspace,"/api/v2/export")
 
     # form the query parameters of the request
     query <- list(
@@ -172,6 +173,7 @@ get_export_jobs <- function(
 #' @export
 start_export <- function(
     qnr_id,
+    workspace = "primary",
     export_type,
     interview_status = "All",
     from = "",
@@ -239,7 +241,7 @@ start_export <- function(
     )
 
     # form the base URL
-    base_url <- paste0(server, "/api/v2/export")
+    base_url <- paste0(server,"/",workspace,"/api/v2/export")
 
     # form the body for the export request, excluding empty elements of list
     body <- list(
@@ -323,6 +325,7 @@ start_export <- function(
 #' @examples
 get_export_job_details <- function(
     job_id,
+    workspace = "primary",
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
     password = Sys.getenv("SUSO_PASSWORD")  # API password
@@ -336,7 +339,7 @@ get_export_job_details <- function(
     )
 
     # form the base URL
-    base_url <- paste0(server, "/api/v2/export/", job_id)
+    base_url <- paste0(server,"/",workspace,"/api/v2/export/", job_id)
 
     # send and get response
     response <- httr::GET(
@@ -405,6 +408,7 @@ get_export_job_details <- function(
 #' @examples
 cancel_export <- function(
     job_id,
+    workspace = "primary",
     verbose = FALSE,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
@@ -419,7 +423,7 @@ cancel_export <- function(
     )
 
     # form the base URL
-    base_url <- paste0(server, "/api/v2/export/", job_id)
+    base_url <- paste0(server,"/",workspace,"/api/v2/export/", job_id)
 
     # send request
     response <- httr::DELETE(
@@ -485,6 +489,7 @@ cancel_export <- function(
 #' @examples
 get_export_file <- function(
     job_id,
+    workspace = "primary",
     path,
     verbose = FALSE,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
@@ -506,7 +511,7 @@ get_export_file <- function(
     )
 
     # form the base URL
-    base_url <- paste0(server, "/api/v2/export/", job_id, "/file")
+    base_url <- paste0(server,"/",workspace,"/api/v2/export/", job_id, "/file")
 
     # request redirect link
     response_redir <- httr::GET(
