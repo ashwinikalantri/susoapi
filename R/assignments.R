@@ -23,6 +23,7 @@
 #'
 #' @noRd
 get_assignment_count <- function(
+    workspace = "primary",
     server = Sys.getenv("SUSO_SERVER"),
     search_by = "",
     qnr_id = "",        # questionnaire ID
@@ -38,7 +39,7 @@ get_assignment_count <- function(
 ) {
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/assignments")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments")
 
     # form the questionnaire ID as QuestionnaireID$Version
     qnr_id_full <- ifelse(
@@ -111,6 +112,7 @@ get_assignment_count <- function(
 #'
 #' @noRd
 get_assignment_batch <- function(
+    workspace = "primary",
     search_by = "",
     qnr_id = "",        # questionnaire ID
     qnr_version = "",   # questionnaire version
@@ -122,7 +124,7 @@ get_assignment_batch <- function(
     limit = 40,         # integer
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password    
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # TODO: add checks
@@ -131,7 +133,7 @@ get_assignment_batch <- function(
     # check_guid(supervisor_id)
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/assignments")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments")
 
     # form the questionnaire ID as QuestionnaireID$Version
     qnr_id_full <- ifelse(
@@ -188,12 +190,13 @@ get_assignment_batch <- function(
 #' @param password Password
 #'
 #' @return Data frame of all assignments that meet search criteria.
-#' 
+#'
 #' @importFrom assertthat assert_that is.string is.flag
 #' @importFrom purrr map_dfr map_chr
 #'
 #' @export
 get_assignments <- function(
+    workspace = "primary",
     search_by = "",
     qnr_id = "",        # questionnaire ID
     qnr_version = "",   # questionnaire version
@@ -203,7 +206,7 @@ get_assignments <- function(
     order = "",         # Possible values are Id, ResponsibleName, InterviewsCount, Quantity, UpdatedAtUtc, CreatedAtUtc Followed by ordering direction "ASC" or "DESC"
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password  
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs
@@ -212,10 +215,10 @@ get_assignments <- function(
     assertthat::assert_that(
         is_guid(qnr_id) | qnr_id == "",
         msg = "Invalid `qnr_id`. The value must be either '' or a valid GUID.")
-    
+
     # responsible
     assertthat::assert_that(
-        is_guid(responsible) | assertthat::is.string(responsible), 
+        is_guid(responsible) | assertthat::is.string(responsible),
         msg = "Responsible ID in `responsible` is not a valid GUID.")
 
     # supervisor_id
@@ -254,6 +257,7 @@ get_assignments <- function(
 
     # get total count of assignments
     total_count <- get_assignment_count(
+        workspace = workspace,
         server = server,
         search_by = search_by,
         qnr_id = qnr_id,
@@ -272,6 +276,7 @@ get_assignments <- function(
             to = total_count,
             by = 40),
         .f = get_assignment_batch,
+        workspace = workspace,
         server = server,
         search_by = search_by,
         qnr_id = qnr_id,
@@ -285,7 +290,7 @@ get_assignments <- function(
     # if no assignments, construct an empty df
     if (total_count == 0) {
         warning("No assignments found that match terms of query.",  call. = FALSE)
-        df <- mutate(df, 
+        df <- mutate(df,
             Id = NA_real_,
             ResponsibleId = NA_character_,
             ResponsibleName = NA_character_,
@@ -331,19 +336,20 @@ get_assignments <- function(
 #'
 #' @export
 get_assignment_details <- function(
+    workspace = "primary",
     id,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password    
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs
     assertthat::assert_that(
-        assertthat::is.count(id), 
+        assertthat::is.count(id),
         msg = "Assignment ID, `id`, must be a non-negative integer")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/assignments/", id)
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments/", id)
 
     # get assignments from the server
     response <- httr::GET(
@@ -403,23 +409,24 @@ get_assignment_details <- function(
 #' @importFrom assertthat assert_that is.count
 #' @import httr
 #' @importFrom jsonlite fromJSON
-#' 
+#'
 #' @export
 get_assignment_quantity_setting <- function(
+    workspace = "primary",
     id,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password       
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs
     # id
     assertthat::assert_that(
-        assertthat::is.count(id), 
+        assertthat::is.count(id),
         msg = "Assignment ID must be a non-negative integer")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/assignments/", id, "/assignmentQuantitySettings")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments/", id, "/assignmentQuantitySettings")
 
     # get assignments from the server
     response <- httr::GET(
@@ -448,7 +455,7 @@ get_assignment_quantity_setting <- function(
     # if another code, return a different warning
     } else {
         message(paste0(
-            "Cannot get the quantity setting for assignment", id, ".", 
+            "Cannot get the quantity setting for assignment", id, ".",
             "\nReason: unknown. HTTP code: ", response_code
         ))
     }
@@ -459,35 +466,36 @@ get_assignment_quantity_setting <- function(
 # Gets history of the assignment
 
 #' Get assignment history
-#' 
+#'
 #' Get the history of actions taken on the target assignment.
-#' 
+#'
 #' Wrapper for the `GET ​/api​/v1​/assignments​/{id}​/history` endpoint
-#' 
+#'
 #' @param id Assignment ID number
 #' @param server Full server web address (e.g., \code{https://demo.mysurvey.solutions}, \code{https://my.domain})
 #' @param user API user name
 #' @param password API password
-#' 
+#'
 #' @import httr
 #' @importFrom jsonlite fromJSON
-#' 
-#' @export 
+#'
+#' @export
 get_assignment_history <- function(
+    workspace = "primary",
     id,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password    
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs
     # id
     assertthat::assert_that(
-        assertthat::is.count(id), 
+        assertthat::is.count(id),
         msg = "Assignment ID must be a non-negative integer")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/assignments/", id, "/history")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments/", id, "/history")
 
     # make request
     response <- httr::GET(
@@ -495,7 +503,7 @@ get_assignment_history <- function(
         httr::authenticate(user = user, password = password),
         httr::accept_json(),
         httr::content_type_json()
-    )    
+    )
 
     status <- httr::status_code(response)
 
@@ -551,23 +559,24 @@ get_assignment_history <- function(
 #' @importFrom assertthat assert_that is.count
 #' @import httr
 #' @importFrom jsonlite toJSON
-#' 
+#'
 #' @export
 check_assignment_audio <- function(
+    workspace = "primary",
     id,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password     
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs
     # id
     assertthat::assert_that(
-        assertthat::is.count(id), 
+        assertthat::is.count(id),
         msg = "Assignment ID must be a non-negative integer")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/assignments/", id, "/recordAudio")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments/", id, "/recordAudio")
 
     # get audio from the server
     response <- httr::GET(
@@ -587,7 +596,7 @@ check_assignment_audio <- function(
         audio <- fromJSON(content(response, as = "text"))$Enabled
 
         message(paste0(
-            "Audio audit is ", ifelse(audio == TRUE, "", "not "), 
+            "Audio audit is ", ifelse(audio == TRUE, "", "not "),
             "enabled for assignment ", id, ".\n",
             "Audio status: "
         ))
@@ -641,25 +650,26 @@ check_assignment_audio <- function(
 #' @importFrom assertthat assert_that is.count
 #' @import httr
 #' @importFrom jsonlite toJSON
-#' 
+#'
 #' @export
 set_assignment_audio <- function(
+    workspace = "primary",
     id,
     enable,                                 # TRUE or FALSE
     verbose,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password 
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs
     # id
     assertthat::assert_that(
-        assertthat::is.count(id), 
+        assertthat::is.count(id),
         msg = "Assignment ID must be a non-negative integer")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/assignments/", id, "/recordAudio")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments/", id, "/recordAudio")
 
     # form the body for the request
     audio_val <- ifelse(enable == TRUE, "true", "false")
@@ -714,20 +724,21 @@ set_assignment_audio <- function(
 #'
 #' @examples
 archive_assignment <- function(
+    workspace = "primary",
     id,
     verbose = FALSE,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password    
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs
     assertthat::assert_that(
-        assertthat::is.count(id), 
+        assertthat::is.count(id),
         msg = "Assignment ID must be a non-negative integer")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/assignments/", id, "/archive")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments/", id, "/archive")
 
     # get assignments from the server
     response <- httr::PATCH(
@@ -737,7 +748,7 @@ archive_assignment <- function(
 		content_type_json()
     )
 
-    # if verbose, return whether operation was successful or not        
+    # if verbose, return whether operation was successful or not
     result <- httr::status_code(response)
 
     if (result == 200) {
@@ -762,43 +773,44 @@ archive_assignment <- function(
 # TODO: Consider making function
 
 #' Reassign assignment to another user
-#' 
+#'
 #' Wrapper for `PATCH ​/api​/v1​/assignments​/{id}​/assign`
-#' 
+#'
 #' @param id Assignment ID number
 #' @param responsible Character. Either user name or GUID.
 #' @param server Full server web address (e.g., \code{https://demo.mysurvey.solutions}, \code{https://my.domain})
 #' @param user API user name
 #' @param password API password
-#' 
+#'
 #' @return Server-side side-effect of reassigning an assignment to another user
-#' 
+#'
 #' @importFrom assertthat assert_that is.count is.string
 #' @import httr
 #' @importFrom jsonlite toJSON
-#' 
-#' @export 
+#'
+#' @export
 reassign_assignment <- function(
+    workspace = "primary",
     id,
     responsible,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")   # API password         
+    password = Sys.getenv("SUSO_PASSWORD")   # API password
 ) {
 
     # check inputs
     # id is a count
     assertthat::assert_that(
-        assertthat::is.count(id), 
+        assertthat::is.count(id),
         msg = "Assignment ID must be a non-negative integer")
 
     # target_user is a GUID or a user name
     assertthat::assert_that(
-        is_guid(responsible) | assertthat::is.string(responsible), 
+        is_guid(responsible) | assertthat::is.string(responsible),
         msg = "Responsible ID in `responsible` is not a valid GUID.")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/assignments/", id, "/assign")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments/", id, "/assign")
 
     # compose body of request
     body <- list(Responsible = responsible)
@@ -851,46 +863,47 @@ reassign_assignment <- function(
 # Change assignments limit on created interviews
 
 #' Change assignment quantity
-#' 
+#'
 #' Change the quantity for the target assignment.
-#' 
+#'
 #' Wrapper for `PATCH ​/api​/v1​/assignments​/{id}​/changeQuantity`
-#' 
+#'
 #' @param id Assignment ID number
-#' @param quantity Numeric. 
+#' @param quantity Numeric.
 #' @param server Full server web address (e.g., \code{https://demo.mysurvey.solutions}, \code{https://my.domain})
 #' @param user API user name
 #' @param password API password
-#' 
+#'
 #' @return Server-side side-effect of changing assignment quantity.
-#' 
+#'
 #' @import httr
 #' @importFrom assertthat assert_that is.count
-#' 
-#' @export 
+#'
+#' @export
 change_assignment_quantity <- function(
+    workspace = "primary",
     id,
     quantity,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")   # API password         
+    password = Sys.getenv("SUSO_PASSWORD")   # API password
 ) {
 
     # check inputs
     # id
     assertthat::assert_that(
-        assertthat::is.count(id), 
+        assertthat::is.count(id),
         msg = "Assignment ID must be a non-negative integer"
     )
 
     # quantity
     assertthat::assert_that(
-        assertthat::is.count(quantity) | quantity == -1, 
+        assertthat::is.count(quantity) | quantity == -1,
         msg = "Quantity must be either a non-negative integer or -1."
     )
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/assignments/", id, "/changeQuantity")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments/", id, "/changeQuantity")
 
     # get assignments from the server
     response <- httr::PATCH(
@@ -946,20 +959,21 @@ change_assignment_quantity <- function(
 #'
 #' @examples
 unarchive_assignment <- function(
+    workspace = "primary",
     id,
     verbose = FALSE,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")   # API password    
+    password = Sys.getenv("SUSO_PASSWORD")   # API password
 ) {
 
     # check inputs
     assertthat::assert_that(
-        assertthat::is.count(id), 
+        assertthat::is.count(id),
         msg = "Assignment ID must be a non-negative integer")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/assignments/", id, "/unarchive")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments/", id, "/unarchive")
 
     # get assignments from the server
     response <- httr::PATCH(
@@ -969,7 +983,7 @@ unarchive_assignment <- function(
 		content_type_json()
     )
 
-    # if verbose, return whether operation was successful or not 
+    # if verbose, return whether operation was successful or not
     result <- httr::status_code(response)
 
     if (result == 200) {
@@ -1007,20 +1021,21 @@ unarchive_assignment <- function(
 #'
 #' @export
 close_assignment <- function(
+    workspace = "primary",
     id,
     verbose = FALSE,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password    
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs
     assertthat::assert_that(
-        assertthat::is.count(id), 
+        assertthat::is.count(id),
         msg = "Assignment ID must be a non-negative integer")
 
     # form base URL
-    base_url <- paste0(server, "/api/v1/assignments/", id, "/close")
+    base_url <- paste0(server,"/",workspace,"/api/v1/assignments/", id, "/close")
 
     # get assignments from the server
     response <- httr::PATCH(
