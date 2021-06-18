@@ -2,36 +2,37 @@
 # Get global notice for the headquarters application
 
 #' Get the global notice
-#' 
+#'
 #' Return the global notice, if any, set for workspaces within the user's scope. For admin, this is all workspaces. For an API user, this is all workspaces to which the user has been added.
-#' 
+#'
 #' Wrapper for the `GET ​/api​/v1​/settings​/globalnotice` endpoint.
-#' 
+#'
 #' @param server Full server web address (e.g., \code{https://demo.mysurvey.solutions}, \code{https://my.domain})
 #' @param user User name
 #' @param password Password
-#' 
+#'
 #' @return Character. Global notice.
-#' 
+#'
 #' @import httr
 #' @importFrom jsonlite fromJSON
-#' 
-#' @export 
+#'
+#' @export
 get_global_notice <- function(
+    workspace = "primary",
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password        
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # form the base URL
-    base_url <- paste0(server, "api/v1/settings/globalnotice")
+    base_url <- paste0(server,"/",workspace,"api/v1/settings/globalnotice")
 
     # get global notice
     response <- httr::GET(
         url = base_url,
         httr::authenticate(user = user, password = password),
 		httr::accept_json(),
-		httr::content_type_json()        
+		httr::content_type_json()
     )
 
     status <- httr::status_code(response)
@@ -55,26 +56,27 @@ get_global_notice <- function(
 # Set global notice for the headquarters application
 
 #' Set the global notice
-#' 
+#'
 #' Set the global notice for workspaces within the user's scope. For admin, this is all workspaces. For an API user, this is all workspaces to which the user has been added.
-#' 
+#'
 #' Wrapper for the `PUT /api​/v1​/settings​/globalnotice` endpoint.
-#' 
+#'
 #' @param text Character. Text of the global notice to display.
 #' @param server Full server web address (e.g., \code{https://demo.mysurvey.solutions}, \code{https://my.domain})
 #' @param user User name
 #' @param password Password
-#' 
+#'
 #' @return Server-side side-effect of setting the global notice text.
-#' 
+#'
 #' @import httr
-#' 
-#' @export 
+#'
+#' @export
 set_global_notice <- function(
     text,
+    workspace = "primary",
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password        
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs
@@ -85,7 +87,7 @@ set_global_notice <- function(
     )
 
     # form the base URL
-    base_url <- paste0(server, "api/v1/settings/globalnotice")
+    base_url <- paste0(server,"/",workspace,"api/v1/settings/globalnotice")
 
     # construct body
     body <- list(
@@ -98,7 +100,7 @@ set_global_notice <- function(
         body = jsonlite::toJSON(body, auto_unbox = TRUE),
         httr::authenticate(user = user, password = password),
 		httr::accept_json(),
-		httr::content_type_json()        
+		httr::content_type_json()
     )
 
     status <- httr::status_code(response)
@@ -126,35 +128,36 @@ set_global_notice <- function(
 # Remove global notice for the headquarters application
 
 #' Delete the global notice
-#' 
+#'
 #' Delete the global notice for workspaces in the user's scope. For admin, this is all workspaces. For an API user, this is all workspaces to which the user has been added.
-#' 
+#'
 #' Wrapper for the `DELETE ​/api​/v1​/settings​/globalnotice` endpoint
-#' 
+#'
 #' @param server Full server web address (e.g., \code{https://demo.mysurvey.solutions}, \code{https://my.domain})
 #' @param user User name
 #' @param password Password
-#' 
+#'
 #' @return Server-side side-effect of deleting the global notice text.
-#' 
+#'
 #' @import httr
-#' 
-#' @export 
+#'
+#' @export
 delete_global_notice <- function(
+    workspace = "primary",
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password   
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # form the base URL
-    base_url <- paste0(server, "api/v1/settings/globalnotice")
+    base_url <- paste0(server,"/",workspace,"api/v1/settings/globalnotice")
 
     # get global notice
     response <- httr::DELETE(
         url = base_url,
         httr::authenticate(user = user, password = password),
 		httr::accept_json(),
-		httr::content_type_json()        
+		httr::content_type_json()
     )
 
     status <- httr::status_code(response)
