@@ -2,7 +2,7 @@
 #' Get all questionnaires
 #'
 #' Get list of all questionnaires and their attributes
-#' 
+#'
 #' GraphQL implementation of the deprecated REST `GET​/api​/v1​/questionnaires` endpoint.
 #'
 #' @param workspace Character. Name of the workspace whose questionnaires to get.
@@ -11,7 +11,7 @@
 #' @param password API password
 #'
 #' @return Data frame of questionnaires.
-#' 
+#'
 #' @importFrom assertthat assert_that
 #' @import ghql
 #' @importFrom jsonlite base64_enc fromJSON
@@ -23,7 +23,7 @@ get_questionnaires <- function(
     workspace = "primary",
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password  
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs
@@ -35,7 +35,7 @@ get_questionnaires <- function(
 
     # compose the GraphQL request client
     questionnaires_request <- ghql::GraphqlClient$new(
-        url = paste0(server, "/graphql"), 
+        url = paste0(server, "/graphql"),
         headers = list(authorization = paste0(
             "Basic ", jsonlite::base64_enc(input = paste0(user, ":", password)))
         )
@@ -44,7 +44,7 @@ get_questionnaires <- function(
     # compose the query for all interviews
     # use string interpolation to pipe double-quoted workspace name into query
     qry <- ghql::Query$new()
-    qry$query("questionnaires", 
+    qry$query("questionnaires",
         glue::glue("{
             questionnaires (workspace: <glue::double_quote(workspace)>) {
                 nodes {
@@ -59,7 +59,7 @@ get_questionnaires <- function(
                         name
                     }
                 }
-                filteredCount   
+                filteredCount
             }
         }", .open = "<", .close = ">")
     )
@@ -139,31 +139,32 @@ get_questionnaires <- function(
 #' @param server Full server web address (e.g., \code{https://demo.mysurvey.solutions}, \code{https://my.domain})
 #' @param user API user name
 #' @param password API password
-#' 
+#'
 #' @import httr
 #' @importFrom assertthat assert_that is.count
 #' @importFrom fs path
-#' 
+#'
 #' @export
 get_questionnaire_document <- function(
     qnr_id,
+    workspace = "primary",
     qnr_version,
     path,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password        
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs:
     # qnr_id
     check_guid(
-        guid = qnr_id, 
+        guid = qnr_id,
         fail_msg = "Questionnaire ID in `qnr_id` is not a valid GUID.")
 
     # qnr_version
     assertthat::assert_that(
         assertthat::is.count(qnr_version),
-        msg = "Questionnaire version number must be a non-negative integer.")    
+        msg = "Questionnaire version number must be a non-negative integer.")
 
     # path
     assertthat::assert_that(
@@ -172,7 +173,7 @@ get_questionnaire_document <- function(
     )
 
     # form the base URL
-    base_url <- paste0(server,
+    base_url <- paste0(server,"/",workspace,
         "/api/v1/questionnaires/", qnr_id, "/", qnr_version, "/document")
 
     # post request and download file
@@ -194,33 +195,33 @@ get_questionnaire_document <- function(
 }
 
 #' Get count of interviews for questionnaire-version
-#' 
+#'
 #' @param workspace Character. Name of the workspace whose interviews to get.
 #' @param qnr_id Questionnaire ID. GUID from server.
 #' @param qnr_version Questionnaire version number.
 #' @param server Character. Full server web address (e.g., \code{https://demo.mysurvey.solutions}, \code{https://my.domain})
 #' @param user Charater. API or admin user name for user that access to the workspace.
 #' @param password API or admin password
-#' 
+#'
 #' @return List consisting of two element: interviews information and interview count
-#' 
+#'
 #' @import ghql
 #' @importFrom jsonlite base64_enc fromJSON
 #' @importFrom glue glue double_quote
-#' 
-#' @noRd 
+#'
+#' @noRd
 get_interviews_for_questionnaire_count <- function(
     workspace = "primary",
     qnr_id,
-    qnr_version,    
+    qnr_version,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password    
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # compose the GraphQL request client
     interviews_request <- ghql::GraphqlClient$new(
-        url = paste0(server, "/graphql"), 
+        url = paste0(server, "/graphql"),
         headers = list(authorization = paste0(
             "Basic ", jsonlite::base64_enc(input = paste0(user, ":", password)))
         )
@@ -229,7 +230,7 @@ get_interviews_for_questionnaire_count <- function(
     # compose the query for all interviews
     # use string interpolation to pipe double-quoted workspace name into query
     qry <- ghql::Query$new()
-    qry$query("interviews", 
+    qry$query("interviews",
         glue::glue("{
             interviews (
                 workspace: <glue::double_quote(workspace)>,
@@ -261,7 +262,7 @@ get_interviews_for_questionnaire_count <- function(
 }
 
 #' Get chuck of interviews returned from the server for the questionnaire-version
-#' 
+#'
 #' @param workspace Character. Name of the workspace whose interviews to get.
 #' @param take_n Numeric. Number of interviews to take in one request.
 #' @param skip_n Numeric. Number of interviews to skip when paging through results.
@@ -270,9 +271,9 @@ get_interviews_for_questionnaire_count <- function(
 #' @param server Character. Full server web address (e.g., \code{https://demo.mysurvey.solutions}, \code{https://my.domain})
 #' @param user Charater. API or admin user name for user that access to the workspace.
 #' @param password API or admin password
-#' 
+#'
 #' @return Data frame. Interviews.
-#' 
+#'
 #' @import ghql
 #' @importFrom jsonlite base64_enc fromJSON
 #' @importFrom glue glue double_quote backtick
@@ -281,22 +282,22 @@ get_interviews_for_questionnaire_count <- function(
 #' @importFrom rlang .data is_empty
 #' @importFrom tibble as_tibble
 #' @importFrom tidyr unnest pivot_wider
-#' 
-#' @noRd 
+#'
+#' @noRd
 get_interviews_for_questionnaire_by_chunk <- function(
     workspace = "primary",
     take_n = 100,
     skip_n = 0,
     qnr_id,
-    qnr_version,    
+    qnr_version,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password    
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # compose the GraphQL request client
     interviews_request <- ghql::GraphqlClient$new(
-        url = paste0(server, "/graphql"), 
+        url = paste0(server, "/graphql"),
         headers = list(authorization = paste0(
             "Basic ", jsonlite::base64_enc(input = paste0(user, ":", password)))
         )
@@ -305,7 +306,7 @@ get_interviews_for_questionnaire_by_chunk <- function(
     # compose the query for all interviews
     # use string interpolation to pipe double-quoted workspace name into query
     qry <- ghql::Query$new()
-    qry$query("interviews", 
+    qry$query("interviews",
         glue::glue("{
             interviews (
                 workspace: <glue::double_quote(workspace)>,
@@ -357,7 +358,7 @@ get_interviews_for_questionnaire_by_chunk <- function(
                     createdDate
                     updateDateUtc
                     receivedByInterviewerAtUtc
-                    interviewMode        
+                    interviewMode
                 }
                 filteredCount
             }
@@ -369,8 +370,8 @@ get_interviews_for_questionnaire_by_chunk <- function(
 
     # convert JSON payload to data frame
     interviews <- jsonlite::fromJSON(interviews_result, flatten = TRUE)
-    
-    interviews_count <- interviews$data$interviews$filteredCount    
+
+    interviews_count <- interviews$data$interviews$filteredCount
 
     if ("errors" %in% names(interviews)) {
 
@@ -392,8 +393,8 @@ get_interviews_for_questionnaire_by_chunk <- function(
     } else if (interviews_count > 0) {
 
         # extract interview data payload
-        interviews_df <- interviews$data$interviews$nodes %>% 
-            purrr::map_if(is.data.frame, list) %>% 
+        interviews_df <- interviews$data$interviews$nodes %>%
+            purrr::map_if(is.data.frame, list) %>%
             tibble::as_tibble()
 
         # extract interview attributes from the payload
@@ -410,10 +411,10 @@ get_interviews_for_questionnaire_by_chunk <- function(
         if (has_any_identifying == TRUE) {
 
             # extract (nested) identifying data
-            identifying_df <- interviews_df %>% 
+            identifying_df <- interviews_df %>%
                 dplyr::select(id, .data$identifyingData) %>%
                 purrr::discard(rlang::is_empty) %>%
-                purrr::map_if(is.data.frame, list) %>% 
+                purrr::map_if(is.data.frame, list) %>%
                 tibble::as_tibble() %>%
                 tidyr::unnest(.data$identifyingData) %>%
                 dplyr::rename_with(
@@ -460,7 +461,7 @@ get_interviews_for_questionnaire_by_chunk <- function(
 #' @param password API password
 #'
 #' @return Data frame of interviews.
-#' 
+#'
 #' @importFrom assertthat assert_that is.count
 #' @importFrom purrr map_dfr
 #'
@@ -472,13 +473,13 @@ get_interviews_for_questionnaire <- function(
     qnr_version,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password  
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs:
     # qnr_id
     check_guid(
-        guid = qnr_id, 
+        guid = qnr_id,
         fail_msg = "Questionnaire ID in `qnr_id` is not a valid GUID.")
 
     # qnr_version
@@ -488,11 +489,11 @@ get_interviews_for_questionnaire <- function(
 
     # get total count of interviews
     interviews_info <- get_interviews_for_questionnaire_count(
-        workspace = workspace, 
+        workspace = workspace,
         qnr_id = qnr_id,
-        qnr_version = qnr_version,  
-        server = server, 
-        user = user, 
+        qnr_version = qnr_version,
+        server = server,
+        user = user,
         password = password
     )
 
@@ -527,10 +528,10 @@ get_interviews_for_questionnaire <- function(
                 take_n = chunk_size,
                 skip_n = .x,
                 qnr_id = qnr_id,
-                qnr_version = qnr_version,                 
-                server = server, 
-                user = user, 
-                password = password            
+                qnr_version = qnr_version,
+                server = server,
+                user = user,
+                password = password
             )
         )
 
@@ -544,25 +545,26 @@ get_interviews_for_questionnaire <- function(
 # Gets list of possible interview statuses
 
 #' Get possible interview statuses
-#' 
+#'
 #' Wrapper for the `GET ​/api​/v1​/questionnaires​/statuses` endpoint.
-#' 
+#'
 #' @param server Full server web address (e.g., \code{https://demo.mysurvey.solutions}, \code{https://my.domain})
 #' @param user API user name
 #' @param password API password
-#' 
+#'
 #' @return Character vector. Names of all possible interview statuses
-#' 
+#'
 #' @import httr
 #' @importFrom jsonlite fromJSON
 get_possible_interview_statuses <- function(
+    workspace = "primary",
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password      
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # form the base URL
-    base_url <- paste0(server, "/api/v1/questionnaires/statuses")
+    base_url <- paste0(server,"/",workspace,"/api/v1/questionnaires/statuses")
 
     # post request
     response <- httr::GET(
@@ -570,7 +572,7 @@ get_possible_interview_statuses <- function(
         httr::authenticate(user = user, password = password),
 		httr::accept_json(),
 		httr::content_type_json()
-    )    
+    )
 
     status <- httr::status_code(response)
 
@@ -613,17 +615,18 @@ get_possible_interview_statuses <- function(
 #' @examples
 set_questionnaire_audio <- function(
     qnr_id,
+    workspace = "primary",
     qnr_version,
     enable,
     server = Sys.getenv("SUSO_SERVER"),     # full server address
     user = Sys.getenv("SUSO_USER"),         # API user name
-    password = Sys.getenv("SUSO_PASSWORD")  # API password  
+    password = Sys.getenv("SUSO_PASSWORD")  # API password
 ) {
 
     # check inputs:
     # qnr_id
     check_guid(
-        guid = qnr_id, 
+        guid = qnr_id,
         fail_msg = "Questionnaire ID in `qnr_id` is not a valid GUID.")
 
     # qnr_version
@@ -637,7 +640,7 @@ set_questionnaire_audio <- function(
         msg = "Whether to enable/disable audio, `enable`, must be a logical value: `TRUE` or `FALSE`")
 
     # form the base URL
-    base_url <- paste0(server,
+    base_url <- paste0(server,"/",workspace,
             "/api/v1/questionnaires/", qnr_id, "/", qnr_version, "/recordAudio")
 
     # form the body for the request
